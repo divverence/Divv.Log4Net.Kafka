@@ -12,10 +12,13 @@ namespace log4net.Kafka.Console
 	{
 		static void Main(string[] args)
 		{
-
+            log4net.GlobalContext.Properties["LogPathModifier"] = "SomeValue";
+            LogManager.GetRepository().Properties["Testje"] = "Hallo";
 			XmlConfigurator.ConfigureAndWatch(new FileInfo(@"log4net.config"));
-
+            LogManager.GetRepository().Properties["Testje2"] = "Hallo2";
+            log4net.GlobalContext.Properties["LogPathModifier2"] = "SomeValue2";
 			ILog logger = LogManager.GetLogger(typeof(Program));
+            log4net.GlobalContext.Properties["LogPathModifier3"] = "SomeValue3";
 
 			logger.Debug("this Debug msg");
 			logger.Warn("this Warn msg");
@@ -32,7 +35,6 @@ namespace log4net.Kafka.Console
 			{
 				logger.Error("this Error msg,中文测试", ex);
 			}
-			System.Console.ReadKey();
 		}
 
 

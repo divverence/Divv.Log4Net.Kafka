@@ -97,6 +97,10 @@ namespace log4net.Kafka
                 foreach (var prop in evt.properties)
                     logstash.WriteString(prop.Key, prop.Value).Append(comma);
 
+                if (evt.contextData?.Any() ?? false)
+                    foreach (var contextData in evt.contextData)
+                        logstash.WriteString(contextData.Key, contextData.Value).Append(comma);
+
                 if (evt.tags?.Any() ?? false)
                 {
                     var innerArray = string.Join(", ", evt.tags.Select(tag => $"\"{tag}\""));

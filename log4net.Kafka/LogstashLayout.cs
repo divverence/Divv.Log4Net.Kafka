@@ -6,17 +6,32 @@ using System.IO;
 using log4net.Core;
 using log4net.Layout;
 using log4net.Util;
+using System.Runtime.Remoting.Messaging;
 
 namespace log4net.Kafka
 {
 	public class LogstashLayout : LayoutSkeleton
 	{
 		public string App { get; set; }
-        public string Tags { get; set; } = "as,bee";
-		public LogstashLayout()
+
+        private string[] _tags;
+        public string Tags
+        {
+            get => string.Join(",", _tags);
+            set => _tags = value?.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        private string[] _callContextVariables;
+        public string CallContextVariables
+        {
+            get => string.Join(",", _callContextVariables);
+            set => _callContextVariables = value?.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public LogstashLayout()
 		{
 			IgnoresException = false;
-		}
+        }
 		public override void ActivateOptions()
 		{
 
@@ -27,6 +42,9 @@ namespace log4net.Kafka
 			var evt = GetJsonObject(loggingEvent);
 
 			var message = evt.ToJson();
+            #if DEBUG
+            Console.WriteLine(message);
+#endif
 
 			writer.Write(message);
 		}
@@ -42,7 +60,7 @@ namespace log4net.Kafka
                     timestamp = loggingEvent.TimeStampUtc.ToString("yyyy-MM-ddTHH:mm:ss.fffZ",
                         CultureInfo.InvariantCulture),
                     app = App,
-                    tags = Tags.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries),
+                    tags = _tags,
                     thread_name = loggingEvent.ThreadName,
                     @class = loggingEvent.LocationInformation?.ClassName,
                     method = loggingEvent.LocationInformation?.MethodName,
@@ -51,7 +69,8 @@ namespace log4net.Kafka
                     logger_name = loggingEvent.LoggerName,
                     message = loggingEvent.RenderedMessage,
                     properties = loggingEventProperties.GetKeys().Select(key =>
-                        new KeyValuePair<string, string>(key, loggingEventProperties[key]?.ToString())).ToArray()
+                        new KeyValuePair<string, string>(key, loggingEventProperties[key]?.ToString())).ToArray(),
+                    contextData = _callContextVariables?.Select( key =>  new KeyValuePair<string, string>(key, CallContext.LogicalGetData(key)?.ToString())).Where( p => p.Value != null).ToArray()
                 };
 
                 if (loggingEvent.ExceptionObject != null)

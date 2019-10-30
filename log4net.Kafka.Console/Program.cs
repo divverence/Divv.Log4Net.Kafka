@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,6 +20,7 @@ namespace log4net.Kafka.Console
             log4net.GlobalContext.Properties["LogPathModifier2"] = "SomeValue2";
 			ILog logger = LogManager.GetLogger(typeof(Program));
             log4net.GlobalContext.Properties["LogPathModifier3"] = "SomeValue3";
+            CallContext.LogicalSetData("answer", 42);
 
 			logger.Debug("this Debug msg");
 			logger.Warn("this Warn msg");

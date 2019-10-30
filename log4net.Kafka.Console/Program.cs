@@ -21,12 +21,13 @@ namespace log4net.Kafka.Console
 			ILog logger = LogManager.GetLogger(typeof(Program));
             log4net.GlobalContext.Properties["LogPathModifier3"] = "SomeValue3";
             CallContext.LogicalSetData("answer", 42);
+            log4net.ThreadContext.Properties["fred"] = "anton";
+            log4net.LogicalThreadContext.Properties["fret"] = "antoon";
 
 			logger.Debug("this Debug msg");
 			logger.Warn("this Warn msg");
 			logger.Info("this Info msg");
-			logger.Error("this Error msg");
-			logger.Fatal("this Fatal msg");
+            Log().Wait();
 
 			try
 			{
@@ -39,7 +40,17 @@ namespace log4net.Kafka.Console
 			}
 		}
 
+        private static async Task Log()
+        {
+            ILog logger = LogManager.GetLogger(typeof(Program));
+            logger.Error("this Error msg");
+            await Task.Delay(1000).ConfigureAwait(false);
+            logger.Error("this Error msg");
+            logger.Fatal("this Fatal msg");
+        }
 
 	}
+
+
 
 }

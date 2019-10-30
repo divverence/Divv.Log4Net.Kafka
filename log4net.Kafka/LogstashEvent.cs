@@ -26,6 +26,7 @@ namespace log4net.Kafka
         public KeyValuePair<string, string>[] properties { get; set; }
         public string[] tags { get; set; }
         public KeyValuePair<string, string>[] contextData { get; set; }
+        public KeyValuePair<string, string>[] threadProps { get; set; }
     }
 	public class LogstashException
 	{

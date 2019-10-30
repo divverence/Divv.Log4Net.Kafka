@@ -101,6 +101,10 @@ namespace log4net.Kafka
                     foreach (var contextData in evt.contextData)
                         logstash.WriteString(contextData.Key, contextData.Value).Append(comma);
 
+                if (evt.threadProps?.Any() ?? false)
+                    foreach (var threadProp in evt.threadProps)
+                        logstash.WriteString(threadProp.Key, threadProp.Value).Append(comma);
+
                 if (evt.tags?.Any() ?? false)
                 {
                     var innerArray = string.Join(", ", evt.tags.Select(tag => $"\"{tag}\""));
@@ -116,7 +120,8 @@ namespace log4net.Kafka
             }
             catch (Exception e)
             {
-                WriteToFile($"Exception in ToJson: {e.Message} {e}");
+                var formattableString = $"Exception in ToJson: {e.Message} {e}";
+                WriteToFile(formattableString);
                 throw;
             }
         }
@@ -126,6 +131,7 @@ namespace log4net.Kafka
             try
             {
 
+                Console.Error.WriteLine(json);
                 if (!Directory.Exists("d:\\Logs"))
                     Directory.CreateDirectory("d:\\Logs");
                 System.IO.File.AppendAllLines("d:\\Logs\\json.json", new []{json});

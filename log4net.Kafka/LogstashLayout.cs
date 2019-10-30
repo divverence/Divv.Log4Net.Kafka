@@ -53,7 +53,13 @@ namespace log4net.Kafka
         {
             try
             {
-                var loggingEventProperties = loggingEvent.GetProperties() ?? new PropertiesDictionary();
+                var loggingEventProperties = loggingEvent.GetProperties();
+                var tcProps = log4net.ThreadContext.Properties;
+                var threadContextProperties = tcProps?.GetKeys()?.Select(key =>
+                        new KeyValuePair<string, string>(key, tcProps[key]?.ToString()))
+                    .ToArray();
+
+
                 var obj = new LogstashEvent
                 {
                     version = 1,
@@ -68,9 +74,10 @@ namespace log4net.Kafka
                     level = loggingEvent.Level.ToString(),
                     logger_name = loggingEvent.LoggerName,
                     message = loggingEvent.RenderedMessage,
-                    properties = loggingEventProperties.GetKeys().Select(key =>
+                    properties = loggingEventProperties?.GetKeys()?.Select(key =>
                         new KeyValuePair<string, string>(key, loggingEventProperties[key]?.ToString())).ToArray(),
-                    contextData = _callContextVariables?.Select( key =>  new KeyValuePair<string, string>(key, CallContext.LogicalGetData(key)?.ToString())).Where( p => p.Value != null).ToArray()
+                    contextData = _callContextVariables?.Select( key =>  new KeyValuePair<string, string>(key, CallContext.LogicalGetData(key)?.ToString())).Where( p => p.Value != null).ToArray(),
+                    threadProps = threadContextProperties
                 };
 
                 if (loggingEvent.ExceptionObject != null)
@@ -87,7 +94,7 @@ namespace log4net.Kafka
             }
             catch (Exception e)
             {
-                $"Exception in GetJson: {e.Message} {e}".WriteToFile();
+                $"Exception in GetJson: {e.Message} {e} {e.StackTrace}".WriteToFile();
                 throw;
             }
         }

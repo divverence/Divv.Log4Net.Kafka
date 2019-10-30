@@ -1,15 +1,22 @@
-﻿using System.Text;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Text;
 
 namespace log4net.Kafka
 {
 	internal static class LogstashExtensions
 	{
 		public static StringBuilder WriteString(this StringBuilder sb, string name, object value)
-		{
-			return sb.Append($"\"{name}\":").WriteString(value.ToString());
+        {
+			return sb.Append($"\"{name.Replace(':','_')}\":").WriteString(value?.ToString());
 		}
 		private static StringBuilder WriteString(this StringBuilder sb, string value)
-		{
+        {
+            if (value is null)
+                return sb.Append("null");
+
 			sb.Append('\"');
 
 			int runIndex = -1;
@@ -71,21 +78,55 @@ namespace log4net.Kafka
 		}
 		public static string ToJson(this LogstashEvent evt)
 		{
-			var logstash = new StringBuilder();
-			logstash.Append("{")
-			.WriteValueObject("@version", evt.version).Append(",")
-			.WriteString("@timestamp", evt.timestamp).Append(",")
-			.WriteString(nameof(LogstashEvent.source_host), evt.source_host).Append(",")
-			.WriteString(nameof(LogstashEvent.app), evt.app).Append(",")
-			.WriteString(nameof(LogstashEvent.thread_name), evt.thread_name).Append(",")
-			.WriteString(nameof(LogstashEvent.@class), evt.@class).Append(",")
-			.WriteString(nameof(LogstashEvent.method), evt.method).Append(",")
-			.WriteString(nameof(LogstashEvent.line_number), evt.line_number).Append(",")
-			.WriteString(nameof(LogstashEvent.level), evt.level).Append(",")
-			.WriteString(nameof(LogstashEvent.logger_name), evt.logger_name).Append(",")
-			.WriteMessage(evt)
-			.Append("}");
-			return logstash.ToString();
-		}
-	}
+            try
+            {
+                var logstash = new StringBuilder();
+                var comma = ",";
+                logstash.Append("{")
+                    .WriteValueObject("@version", evt.version).Append(comma)
+                    .WriteString("@timestamp", evt.timestamp).Append(comma)
+                    //.WriteString(nameof(LogstashEvent.source_host), evt.source_host).Append(comma)
+                    .WriteString(nameof(LogstashEvent.app), evt.app).Append(comma)
+                    .WriteString(nameof(LogstashEvent.thread_name), evt.thread_name).Append(comma)
+                    .WriteString(nameof(LogstashEvent.@class), evt.@class).Append(comma)
+                    .WriteString(nameof(LogstashEvent.method), evt.method).Append(comma)
+                    //.WriteString(nameof(LogstashEvent.line_number), evt.line_number).Append(comma)
+                    .WriteString(nameof(LogstashEvent.level), evt.level).Append(comma)
+                    .WriteString(nameof(LogstashEvent.logger_name), evt.logger_name).Append(comma);
+
+                foreach (var prop in evt.properties)
+                    logstash.WriteString(prop.Key, prop.Value).Append(comma);
+
+                if (evt.tags?.Any() ?? false)
+                {
+                    var innerArray = string.Join(", ", evt.tags.Select(tag => $"\"{tag}\""));
+                    logstash.Append($"\"tags\":[{innerArray}]").Append(comma);
+                }
+
+                logstash.WriteMessage(evt)
+                    .Append("}");
+
+                var json = logstash.ToString();
+                //WriteToFile(json);
+                return json;
+            }
+            catch (Exception e)
+            {
+                WriteToFile($"Exception in ToJson: {e.Message} {e}");
+                throw;
+            }
+        }
+
+        public static void WriteToFile( this string json)
+        {
+            try
+            {
+
+                if (!Directory.Exists("d:\\Logs"))
+                    Directory.CreateDirectory("d:\\Logs");
+                System.IO.File.AppendAllLines("d:\\Logs\\json.json", new []{json});
+            }
+            catch{ }
+        }
+    }
 }

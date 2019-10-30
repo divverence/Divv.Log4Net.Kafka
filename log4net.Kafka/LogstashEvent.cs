@@ -23,7 +23,9 @@ namespace log4net.Kafka
 		public string logger_name { get; set; }
 		public string message { get; set; }
 		public LogstashException exception { get; set; }
-	}
+        public KeyValuePair<string, string>[] properties { get; set; }
+        public string[] tags { get; set; }
+    }
 	public class LogstashException
 	{
 		public string exception_class { get; set; }

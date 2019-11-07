@@ -5,12 +5,13 @@ using System.Globalization;
 using System.IO;
 using log4net.Core;
 using log4net.Layout;
-using log4net.Util;
 using System.Runtime.Remoting.Messaging;
+using JetBrains.Annotations;
 
-namespace log4net.Kafka
+namespace Divv.Log4Net.Json
 {
-	public class LogstashLayout : LayoutSkeleton
+    [PublicAPI]
+	public sealed class JsonLayout : LayoutSkeleton
 	{
 		public string App { get; set; }
 
@@ -28,13 +29,13 @@ namespace log4net.Kafka
             set => _callContextVariables = value?.Split(new[] {',', ' '}, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public LogstashLayout()
+        public JsonLayout()
 		{
 			IgnoresException = false;
         }
+
 		public override void ActivateOptions()
 		{
-
 		}
 
 		public override void Format(TextWriter writer, LoggingEvent loggingEvent)
@@ -49,7 +50,7 @@ namespace log4net.Kafka
 			writer.Write(message);
 		}
 
-        private LogstashEvent GetJsonObject(LoggingEvent loggingEvent)
+        private JsonEvent GetJsonObject(LoggingEvent loggingEvent)
         {
             try
             {
@@ -60,7 +61,7 @@ namespace log4net.Kafka
                     .ToArray();
 
 
-                var obj = new LogstashEvent
+                var obj = new JsonEvent
                 {
                     version = 1,
                     timestamp = loggingEvent.TimeStampUtc.ToString("yyyy-MM-ddTHH:mm:ss.fffZ",
@@ -82,7 +83,7 @@ namespace log4net.Kafka
 
                 if (loggingEvent.ExceptionObject != null)
                 {
-                    obj.exception = new LogstashException
+                    obj.exception = new JsonException
                     {
                         exception_class = loggingEvent.ExceptionObject.GetType().ToString(),
                         exception_message = loggingEvent.ExceptionObject.Message,

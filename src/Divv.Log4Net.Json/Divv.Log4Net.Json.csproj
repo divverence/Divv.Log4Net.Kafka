@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- BUILD -->
+  <PropertyGroup>
+    <TargetFramework>net452</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+    <RelativePublishBinDir>bin</RelativePublishBinDir>
+  </PropertyGroup>
+  <!-- *SPECIFICS* -->
+  <PropertyGroup>
+    <Description>log4net to kafka</Description>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <!-- *REF NUGET PACKAGES* -->
+  <ItemGroup>
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+  </ItemGroup>
+  <!-- *REF PROJECTS* -->
+  <ItemGroup>
+  </ItemGroup>
+  <!-- *EMBEDDED RESOURCES* -->
+  <ItemGroup>
+  </ItemGroup>
+  <!-- EMBED SOURCES -->
+  <ItemGroup>
+    <EmbeddedFiles Include="@(Compile)" />
+  </ItemGroup>
+</Project>

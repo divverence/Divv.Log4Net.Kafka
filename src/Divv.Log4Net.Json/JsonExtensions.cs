@@ -4,9 +4,9 @@ using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace log4net.Kafka
+namespace Divv.Log4Net.Json
 {
-	internal static class LogstashExtensions
+	internal static class JsonExtensions
 	{
 		public static StringBuilder WriteString(this StringBuilder sb, string name, object value)
         {
@@ -61,22 +61,22 @@ namespace log4net.Kafka
 		{
 			return sb.Append($"\"{name}\":{value}");
 		}
-		public static StringBuilder WriteMessage(this StringBuilder sb, LogstashEvent evt)
+		public static StringBuilder WriteMessage(this StringBuilder sb, JsonEvent evt)
 		{
-			sb.WriteString(nameof(LogstashEvent.message), evt.message);
+			sb.WriteString(nameof(JsonEvent.message), evt.message);
 
 			if (evt.exception != null)
 			{
 				sb.Append(",")
 				  .Append("\"exception\":{")
-				  .WriteString(nameof(LogstashException.exception_class), evt.exception.exception_class).Append(",")
-				  .WriteString(nameof(LogstashException.exception_message), evt.exception.exception_message).Append(",")
-				  .WriteString(nameof(LogstashException.stacktrace), evt.exception.stacktrace)
+				  .WriteString(nameof(JsonException.exception_class), evt.exception.exception_class).Append(",")
+				  .WriteString(nameof(JsonException.exception_message), evt.exception.exception_message).Append(",")
+				  .WriteString(nameof(JsonException.stacktrace), evt.exception.stacktrace)
 				  .Append("}");
 			}
 			return sb;
 		}
-		public static string ToJson(this LogstashEvent evt)
+		public static string ToJson(this JsonEvent evt)
 		{
             try
             {
@@ -85,14 +85,14 @@ namespace log4net.Kafka
                 logstash.Append("{")
                     .WriteValueObject("@version", evt.version).Append(comma)
                     .WriteString("@timestamp", evt.timestamp).Append(comma)
-                    //.WriteString(nameof(LogstashEvent.source_host), evt.source_host).Append(comma)
-                    .WriteString(nameof(LogstashEvent.app), evt.app).Append(comma)
-                    .WriteString(nameof(LogstashEvent.thread_name), evt.thread_name).Append(comma)
-                    .WriteString(nameof(LogstashEvent.@class), evt.@class).Append(comma)
-                    .WriteString(nameof(LogstashEvent.method), evt.method).Append(comma)
-                    //.WriteString(nameof(LogstashEvent.line_number), evt.line_number).Append(comma)
-                    .WriteString(nameof(LogstashEvent.level), evt.level).Append(comma)
-                    .WriteString(nameof(LogstashEvent.logger_name), evt.logger_name).Append(comma);
+                    //.WriteString(nameof(JsonEvent.source_host), evt.source_host).Append(comma)
+                    .WriteString(nameof(JsonEvent.app), evt.app).Append(comma)
+                    .WriteString(nameof(JsonEvent.thread_name), evt.thread_name).Append(comma)
+                    .WriteString(nameof(JsonEvent.@class), evt.@class).Append(comma)
+                    .WriteString(nameof(JsonEvent.method), evt.method).Append(comma)
+                    //.WriteString(nameof(JsonEvent.line_number), evt.line_number).Append(comma)
+                    .WriteString(nameof(JsonEvent.level), evt.level).Append(comma)
+                    .WriteString(nameof(JsonEvent.logger_name), evt.logger_name).Append(comma);
 
                 foreach (var prop in evt.properties)
                     logstash.WriteString(prop.Key, prop.Value).Append(comma);

@@ -14,10 +14,10 @@
   </PropertyGroup>
   <!-- *REF NUGET PACKAGES* -->
   <ItemGroup>
+    <PackageReference Include="log4net" Version="2.0.8" />
   </ItemGroup>
   <!-- *REF PROJECTS* -->
   <ItemGroup>
-    <ProjectReference Include="..\log4net.Kafka\log4net.Kafka.csproj"/>
   </ItemGroup>
   <!-- *EMBEDDED RESOURCES* -->
   <ItemGroup>
@@ -25,5 +25,10 @@
   <!-- EMBED SOURCES -->
   <ItemGroup>
     <EmbeddedFiles Include="@(Compile)" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="log4net.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

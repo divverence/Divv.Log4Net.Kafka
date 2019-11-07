@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace log4net.Kafka
+namespace Divv.Log4Net.Json
 {
 	/// <summary>
 	/// logstash format
 	/// </summary>
-	public class LogstashEvent
+	public class JsonEvent
 	{
 		public int version { get; set; }
 		public string timestamp { get; set; }
@@ -22,13 +18,13 @@ namespace log4net.Kafka
 		public string level { get; set; }
 		public string logger_name { get; set; }
 		public string message { get; set; }
-		public LogstashException exception { get; set; }
+		public JsonException exception { get; set; }
         public KeyValuePair<string, string>[] properties { get; set; }
         public string[] tags { get; set; }
         public KeyValuePair<string, string>[] contextData { get; set; }
         public KeyValuePair<string, string>[] threadProps { get; set; }
     }
-	public class LogstashException
+	public class JsonException
 	{
 		public string exception_class { get; set; }
 		public string exception_message { get; set; }

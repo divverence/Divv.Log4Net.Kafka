@@ -5,7 +5,7 @@ using System.IO;
 using Confluent.Kafka;
 using JetBrains.Annotations;
 
-namespace log4net.Kafka
+namespace Divv.Log4Net.Kafka
 {
     [PublicAPI]
 	public class KafkaAppender : AppenderSkeleton
@@ -90,7 +90,6 @@ namespace log4net.Kafka
 		{
 			var message = GetMessage(loggingEvent);
 			var topic = GetTopic(loggingEvent);
-
 			_producer.Produce(topic, 
                     new Message<string, string>
                     {

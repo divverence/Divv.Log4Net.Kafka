@@ -1,10 +1,8 @@
 ﻿using log4net.Config;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Runtime.Remoting.Messaging;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace log4net.Kafka.Console
@@ -24,21 +22,32 @@ namespace log4net.Kafka.Console
             log4net.ThreadContext.Properties["fred"] = "anton";
             log4net.LogicalThreadContext.Properties["fret"] = "antoon";
 
-			logger.Debug("this Debug msg");
-			logger.Warn("this Warn msg");
-			logger.Info("this Info msg");
-            Log().Wait();
+            while (true)
+            {
+                logger.Debug("this Debug msg");
+                logger.Warn("this Warn msg");
+                logger.Info("this Info msg");
+                Log().Wait();
 
-			try
-			{
-				var i = 0;
-				var j = 5 / i;
-			}
-			catch (Exception ex)
-			{
-				logger.Error("this Error msg,中文测试", ex);
-			}
-		}
+                try
+                {
+                    var i = 0;
+                    var j = 5 / i;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error("this Error msg,中文测试", ex);
+                }
+
+                if (System.Console.KeyAvailable)
+                    break;
+
+                Thread.Sleep(5000);
+
+                if (System.Console.KeyAvailable)
+                    break;
+            }
+        }
 
         private static async Task Log()
         {

@@ -1,19 +1,16 @@
 ﻿using log4net.Appender;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using log4net.Core;
-using KafkaNet;
-using KafkaNet.Model;
 using System.IO;
+using Confluent.Kafka;
+using JetBrains.Annotations;
 
 namespace log4net.Kafka
 {
+    [PublicAPI]
 	public class KafkaAppender : AppenderSkeleton
 	{
-		private Producer _producer;
+		private IProducer<string, string> _producer;
 
 		public KafkaSettings KafkaSettings { get; set; }
 
@@ -22,85 +19,88 @@ namespace log4net.Kafka
 			base.ActivateOptions();
 			Start();
 		}
+
 		private void Start()
 		{
 			try
 			{
 				if (KafkaSettings == null) throw new LogException("KafkaSettings is missing");
 
-				if (KafkaSettings.Brokers == null || KafkaSettings.Brokers.Count == 0) throw new Exception("Broker is not found");
+				if (KafkaSettings.Brokers == null || KafkaSettings.Brokers.Count == 0) throw new LogException("Broker is not found");
 
 				if (_producer == null)
 				{
-					var brokers = KafkaSettings.Brokers.Select(x => new Uri(x)).ToArray();
-					var kafkaOptions = new KafkaOptions(brokers);
-#if DEBUG
-					kafkaOptions.Log = new ConsoleLog();
-#else
-					kafkaOptions.Log = new KafkaLog();
-#endif
-					_producer = new Producer(new BrokerRouter(kafkaOptions));
+                    var producerConfig = new ProducerConfig
+                    {
+                        BootstrapServers = string.Join(",",KafkaSettings.Brokers),
+                        Acks = Acks.None,
+                    };
+                    _producer = new ProducerBuilder<string, string>(producerConfig)
+                        .SetErrorHandler(OnProduceError)
+                        .Build();
 				}
 			}
 			catch (Exception ex)
 			{
-				ErrorHandler.Error("could not stop producer", ex);
+				ErrorHandler.Error("Could not create producer", ex);
 			}
-
 		}
-		private void Stop()
+
+        private void OnProduceError(IProducer<string, string> _, Error error)
+        {
+            ErrorHandler.Error($"Could not publish message to Kafka: {error}");
+        }
+
+        private void Stop()
 		{
 			try
 			{
-				_producer?.Stop();
-			}
+                _producer?.Flush(TimeSpan.FromSeconds(30));
+                _producer?.Dispose();
+                _producer = null;
+            }
 			catch (Exception ex)
 			{
-				ErrorHandler.Error("could not start producer", ex);
+				ErrorHandler.Error("Error while stopping producer", ex);
 			}
 		}
+
 		private string GetTopic(LoggingEvent loggingEvent)
 		{
-			string topic = null;
-			if (KafkaSettings.Topic != null)
-			{
-				var sb = new StringBuilder();
-				using (var sw = new StringWriter(sb))
-				{
-					KafkaSettings.Topic.Format(sw, loggingEvent);
-					topic = sw.ToString();
-				}
-			}
+            if (KafkaSettings.Topic == null)
+                return $"{loggingEvent.LoggerName}.{loggingEvent.Level.Name}";
 
-			if (string.IsNullOrEmpty(topic))
-			{
-				topic = $"{loggingEvent.LoggerName}.{loggingEvent.Level.Name}";
-			}
+            using var sw = new StringWriter();
+            KafkaSettings.Topic.Format(sw, loggingEvent);
+            return sw.ToString();
+        }
 
-			return topic;
-		}
 		private string GetMessage(LoggingEvent loggingEvent)
 		{
-			var sb = new StringBuilder();
-			using (var sr = new StringWriter(sb))
-			{
-				Layout.Format(sr, loggingEvent);
+            using var sr = new StringWriter();
+            Layout.Format(sr, loggingEvent);
 
-				if (Layout.IgnoresException && loggingEvent.ExceptionObject != null)
-					sr.Write(loggingEvent.GetExceptionString());
+            if (Layout.IgnoresException && loggingEvent.ExceptionObject != null)
+                sr.Write(loggingEvent.GetExceptionString());
 
-				return sr.ToString();
-			}
-		}
+            return sr.ToString();
+        }
 
 		protected override void Append(LoggingEvent loggingEvent)
 		{
 			var message = GetMessage(loggingEvent);
 			var topic = GetTopic(loggingEvent);
 
-			_producer.SendMessageAsync(topic, new[] { new KafkaNet.Protocol.Message(message) });
+			_producer.Produce(topic, 
+                    new Message<string, string>
+                    {
+                        Key = "log4net",
+                        Timestamp = new Timestamp(loggingEvent.TimeStampUtc),
+                        Value = message
+                    });
 		}
-		protected override void OnClose()
+
+        protected override void OnClose()
 		{
 			base.OnClose();
 			Stop();

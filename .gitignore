@@ -6,3 +6,4 @@ obj/
 bin/
 .vs/
 *.user
+/_NCrunch_log4net.Kafka

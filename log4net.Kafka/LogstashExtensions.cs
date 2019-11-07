@@ -130,7 +130,6 @@ namespace log4net.Kafka
         {
             try
             {
-
                 Console.Error.WriteLine(json);
                 if (!Directory.Exists("d:\\Logs"))
                     Directory.CreateDirectory("d:\\Logs");

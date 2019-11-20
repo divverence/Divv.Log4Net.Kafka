@@ -11,6 +11,12 @@ Change log entries should be formulated in the imperative present tense.
 
 # Changelog
 
+## Unreleased
+
+### Miscellaneous
+
+* Build script fix: copy native libraries to the `built` directory
+
 ## [0.1.0]
 
 Initial public release of Divv.Log4Net.Kafka

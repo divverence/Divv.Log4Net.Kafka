@@ -42,3 +42,4 @@ if (-not (Test-Path "built")) {
 dotnet test --no-restore --no-build -c Release /p:CollectCoverage=true /p:Exclude=[xunit.*]* /p:CoverletOutput='../../built/DivvLog4Net.xml' /p:CoverletOutputFormat=cobertura
 
 gci src\*\bin\Release\net452\Divv*.dll | copy-item -Destination ./built/
+gci -Directory src\*\bin\Release\net452\* | copy-item -Destination ./built/ -Recurse

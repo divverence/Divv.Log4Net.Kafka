@@ -75,3 +75,8 @@ Loading the appender is done by referencing the full type string `type="Divv.Log
 ### Alternative modes of operation
 
 Of course, you don't have to publish json objects to Kafka; you can use any layouter you like (such as PatternLayout). You can also use the Json Layout with other appenders, such as a UDP appender.
+
+## Credits
+
+This is a fork of https://github.com/icsharp/log4net.Kafka . Subjective improvements include (semi) automatic additions of context variables and callcontext variables, a more objective improvement is
+the use of Confluent's officially supported Confluent.Kafka client nuget package. Planned improvement is moving away from self-serialized Json and using the battle-hardened Newtonsoft.Json instead.

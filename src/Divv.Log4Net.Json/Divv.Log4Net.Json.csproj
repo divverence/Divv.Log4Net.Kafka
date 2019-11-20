@@ -34,7 +34,6 @@
   	  <Output ItemName="AssembliesToMerge" TaskParameter="Include" />
     </CreateItem>
 	<Message Importance="high" Text="Executing ILMerge... merging in @(AssembliesToMerge->'%(Filename)%(Extension)', ' ')" />
-    <Exec Command="dir $(OutDir)" />
     <Exec Command="&quot;$(PkgILMerge)\tools\net452\ILMerge.exe&quot; /lib:$(OutDir) /ndebug /out:@(MainAssembly) &quot;@(IntermediateAssembly)&quot; @(AssembliesToMerge->'&quot;%(Filename)%(Extension)&quot;', ' ')" />
     <Delete Files="@(AssembliesToMerge->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
   </Target>

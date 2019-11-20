@@ -17,9 +17,9 @@
   </PropertyGroup>
 
   <!-- PACKAGE AND VERSION CREATION -->
-  <Import Project="built\*.Build.props" />
+  <Import Project=".build\*.Build.props" />
   <ItemGroup>
-    <Compile Include="..\..\built\SharedAssemblyInfo*.cs" Link="SharedAssemblyInfo.cs" />
+    <Compile Include="..\..\.build\SharedAssemblyInfo*.cs" Link="SharedAssemblyInfo.cs" />
   </ItemGroup>
 
   <!-- Divv.Gear.Configuration -->

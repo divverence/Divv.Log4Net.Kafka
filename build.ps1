@@ -17,13 +17,13 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyInformationalVersionAttribute("$($version.FullSemVer)")]
 "@
 
-    if (-not (Test-Path "built")) {
-        New-Item -ItemType Directory "built"
+    if (-not (Test-Path ".build")) {
+        New-Item -ItemType Directory ".build"
     }
-    $assemblyInfoContent | Out-File -Encoding utf8 (Join-Path "built" "SharedAssemblyInfo.cs") -Force
+    $assemblyInfoContent | Out-File -Encoding utf8 (Join-Path ".build" "SharedAssemblyInfo.cs") -Force
 }
 
-
+Remove-Item .build -Force -Recurse -ErrorAction SilentlyContinue
 Remove-Item built -Force -Recurse -ErrorAction SilentlyContinue
 
 $version = git-flow-version | ConvertFrom-Json
@@ -34,4 +34,11 @@ New-Package $version
 dotnet clean 
 dotnet restore
 dotnet build --no-restore -c Release
+
+if (-not (Test-Path "built")) {
+	New-Item -ItemType Directory "built"
+}
+
 dotnet test --no-restore --no-build -c Release /p:CollectCoverage=true /p:Exclude=[xunit.*]* /p:CoverletOutput='../../built/DivvLog4Net.xml' /p:CoverletOutputFormat=cobertura
+
+gci src\*\bin\Release\net452\Divv*.dll | copy-item -Destination ./built/

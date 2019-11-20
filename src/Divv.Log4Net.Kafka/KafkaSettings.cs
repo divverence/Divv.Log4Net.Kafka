@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace log4net.Kafka
+namespace Divv.Log4Net.Kafka
 {
 	public class KafkaSettings
 	{

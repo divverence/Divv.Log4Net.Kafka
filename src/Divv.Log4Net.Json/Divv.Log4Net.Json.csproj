@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <!-- BUILD -->
+  <PropertyGroup>
+    <TargetFramework>net452</TargetFramework>
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputType>Library</OutputType>
+    <IsPackable>false</IsPackable>
+    <RelativePublishBinDir>bin</RelativePublishBinDir>
+  </PropertyGroup>
+  <!-- *SPECIFICS* -->
+  <PropertyGroup>
+    <Description>log4net to kafka</Description>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <!-- *REF NUGET PACKAGES* -->
+  <ItemGroup>
+    <PackageReference Include="ILMerge" Version="3.0.29" GeneratePathProperty="true" />
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+  </ItemGroup>
+  <!-- *REF PROJECTS* -->
+  <ItemGroup>
+  </ItemGroup>
+  <!-- *EMBEDDED RESOURCES* -->
+  <ItemGroup>
+  </ItemGroup>
+  <!-- EMBED SOURCES -->
+  <ItemGroup>
+    <EmbeddedFiles Include="@(Compile)" />
+  </ItemGroup>
+  <!-- ILMerge -->
+  <Target Name="MergeIL" Condition=" '$(Configuration)' == 'Release' " AfterTargets="Build">
+    <CreateItem Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)'=='.dll' AND '%(Filename)'!='log4net'">
+  	  <Output ItemName="AssembliesToMerge" TaskParameter="Include" />
+    </CreateItem>
+	<Message Importance="high" Text="Executing ILMerge... merging in @(AssembliesToMerge->'%(Filename)%(Extension)', ' ')" />
+    <Exec Command="&quot;$(PkgILMerge)\tools\net452\ILMerge.exe&quot; /lib:$(OutDir) /ndebug /out:@(MainAssembly) &quot;@(IntermediateAssembly)&quot; @(AssembliesToMerge->'&quot;%(Filename)%(Extension)&quot;', ' ')" />
+    <Delete Files="@(AssembliesToMerge->'$(OutDir)%(DestinationSubDirectory)%(Filename)%(Extension)')" />
+  </Target>
+</Project>

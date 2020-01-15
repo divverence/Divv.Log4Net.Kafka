@@ -93,7 +93,7 @@ namespace Divv.Log4Net.Kafka
 			_producer.Produce(topic, 
                     new Message<string, string>
                     {
-                        Key = "log4net",
+                        Key = null,
                         Timestamp = new Timestamp(loggingEvent.TimeStampUtc),
                         Value = message
                     });

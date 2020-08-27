@@ -41,4 +41,6 @@ if (-not (Test-Path "built")) {
 
 dotnet test --no-restore --no-build -c Release /p:CollectCoverage=true /p:Exclude=[xunit.*]* /p:CoverletOutput='../../built/DivvLog4Net.xml' /p:CoverletOutputFormat=cobertura
 
-gci src\*\bin\Release\net452\Divv*.dll | copy-item -Destination ./built/
+$Net452ZipPath = (Join-Path "built" "Divv.Log4Net.Kafka_$($version.SemVer)_net452.zip")
+gci src\*\bin\Release\net452\Divv*.dll | compress-archive -DestinationPath $Net452ZipPath
+gci -Directory src\*\bin\Release\net452\* | compress-archive -DestinationPath $Net452ZipPath -Update
